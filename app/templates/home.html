@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block body %}
+  <div class="card" style="padding:28px">
+    <div class="hero" style="display:grid; gap:14px;">
+      <div class="badge">MatrixHub • A2A Verification</div>
+      <h1 style="margin:0">MatrixHub</h1>
+      <p class="lede">
+        MatrixHub uses <strong>A2A agents</strong> and <strong>MCP servers</strong> to deliver
+        plug-and-play building blocks for <em>multi-agent applications</em>. This instance ships
+        a compact <strong>A2A Validator</strong> UI so you can quickly connect to agents,
+        inspect their <em>Agent Card</em>, and validate protocol compliance.
+      </p>
+
+      <div class="cta">
+        <a class="btn" href="/validator">Open Validator</a>
+      </div>
+
+      <div class="meta">
+        <span class="chip">Product: MatrixHub Validator</span>
+        <span class="chip">Version: {{ request.app.version }}</span>
+        <span class="chip">Endpoints: /validator · /agent-card · /healthz · /readyz</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card feature">
+      <div class="icon">🤝</div>
+      <h3>What is A2A?</h3>
+      <p>
+        <strong>A2A (Agent-to-Agent)</strong> is a simple, open protocol that lets independently
+        built AI agents talk to each other over the web. It standardizes three things:
+      </p>
+      <div class="list">
+        <div>• <strong>Discovery</strong> — every agent publishes an <em>Agent Card</em> (JSON) with
+          name/description/version, capabilities (e.g. streaming), skills, and default IO modes.
+          Think of it like “openapi.json” for agents.</div>
+        <div>• <strong>Messaging</strong> — structured events over HTTP/JSON-RPC (and optionally websockets):
+          <code>message</code>, <code>task</code>, <code>status-update</code>, <code>artifact-update</code>;
+          supports streaming; carries metadata for auth/tenancy.</div>
+        <div>• <strong>Interop rules</strong> — content types, IDs, correlation, and validation
+          so different frameworks can compose cleanly.</div>
+      </div>
+      <p style="margin-top:8px">
+        <strong>Why it matters:</strong> interoperability, discoverability, portability, safety/compliance,
+        and composability (fan-out, tools-as-agents) with consistent IDs and streaming.
+      </p>
+    </div>
+
+    <div class="card feature">
+      <div class="icon">🧭</div>
+      <h3>Where MatrixHub fits</h3>
+      <p>MatrixHub is the “registry + utilities” layer for A2A:</p>
+      <div class="list">
+        <div>• <strong>Directory/Catalog:</strong> publish & discover A2A-compatible agents by skill, version, trust.</div>
+        <div>• <strong>Validation & QA:</strong> lint Agent Cards and live endpoints (what this Validator UI does).</div>
+        <div>• <strong>Routing/Relay:</strong> optional proxy for CORS, auth, rate-limits, observability.</div>
+        <div>• <strong>Dev Experience:</strong> templates, SDKs, and “try it” UIs for quick local testing.</div>
+        <div>• <strong>Governance:</strong> versions, deprecation, and optional signing (provenance & trust).</div>
+      </div>
+      <p style="margin-top:8px">
+        Think of MatrixHub as the connective tissue that makes A2A practical at team/org scale.
+      </p>
+    </div>
+
+    <div class="card feature">
+      <div class="icon">🧩</div>
+      <h3>A2A on MCP servers</h3>
+      <p>
+        MCP is great for wiring <em>tools</em> to <em>clients</em> (e.g., editor ↔ tools). A2A complements MCP for
+        agent↔agent federation across domains:
+      </p>
+      <div class="list">
+        <div>• <strong>Expose MCP tools as A2A skills:</strong> publish an Agent Card; other agents can discover/call them.</div>
+        <div>• <strong>Cross-ecosystem calls:</strong> LLM agents, workflows, or other MCP servers invoke via A2A without speaking MCP.</div>
+        <div>• <strong>Uniform messaging:</strong> map MCP tool calls to A2A <code>message</code>/<code>task</code> and use A2A streaming.</div>
+        <div>• <strong>Catalog integration:</strong> MatrixHub indexes your MCP server by its Agent Card for discovery & testing.</div>
+      </div>
+      <p style="margin-top:8px">
+        Net effect: MCP stays your local tool bridge; A2A turns it into an internet-addressable agent other agents can compose with.
+      </p>
+    </div>
+  </div>
+
+  <div class="card arch">
+    <h3 style="margin-top:0">What this program does now</h3>
+    <div class="diagram">
+      <div class="lane">
+        <div class="box user">You</div>
+        <div class="arrow">/validator</div>
+        <div class="box ai">MatrixHub Validator</div>
+        <div class="arrow">/agent-card</div>
+        <div class="box svc">Target Agent (A2A)</div>
+      </div>
+    </div>
+
+    <div class="quick">
+      <p><strong>Summary:</strong> This instance exposes a lightweight A2A Validator:</p>
+      <div class="list" style="margin-top:6px">
+        <div>• <strong>Validator UI</strong> at <code>/validator</code> — connect to an agent URL, fetch & validate its Agent Card.</div>
+        <div>• <strong>Alias</strong> <code>POST /agent-card</code> → <code>/validator/agent-card</code> (frontend default).</div>
+        <div>• <strong>Health</strong> endpoints: <code>/healthz</code>, <code>/readyz</code>.</div>
+        <div>• <strong>Socket.IO</strong> mounted at <code>/socket.io</code> (used for debug logs & future streaming).</div>
+        <div>• RAG/Chat/Plan routes are disabled here to keep the focus on A2A verification.</div>
+      </div>
+
+      <details style="margin-top:10px">
+        <summary>Quick start (local)</summary>
+        <pre><code># Run the service
+uvicorn app.main:app --host 0.0.0.0 --port 7860
+
+# Open the Validator UI
+# → http://localhost:7860/validator
+
+# (Optional) Resolve an Agent Card directly (server alias)
+curl -s -X POST http://localhost:7860/agent-card \
+  -H 'content-type: application/json' \
+  -d '{"url":"https://example.com/.well-known/agent.json","sid":"debug"}' | jq</code></pre>
+      </details>
+    </div>
+  </div>
+
+  <style>
+    .hero .badge{
+      display:inline-block; font-size:12px; letter-spacing:.06em;
+      color:#002f1b; background:linear-gradient(180deg,#00ff9c,#00c97e);
+      border-radius:999px; padding:6px 10px; font-weight:700;
+      box-shadow:0 6px 24px rgba(0,255,156,.25);
+    }
+    h1 { font-family:"Share Tech Mono", monospace; color:var(--matrix); letter-spacing:.03em; }
+    .lede { font-size:16px; opacity:.95; max-width:64ch; }
+    .cta { display:flex; gap:10px; margin-top:4px; flex-wrap:wrap; }
+    .btn {
+      display:inline-block; text-decoration:none; padding:10px 14px; border-radius:12px;
+      font-weight:700; font-family:"Share Tech Mono", monospace; letter-spacing:.03em;
+      background:linear-gradient(180deg,#00ff9c,#00c97e); color:#032215;
+      box-shadow:0 6px 20px rgba(0,255,156,.25);
+    }
+    .btn.ghost { background:#0b1a12; color:var(--muted); border:1px solid var(--border); box-shadow:none; }
+    .btn:hover { filter:brightness(1.05); }
+    .meta { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    .chip {
+      font-size:12px; border:1px solid var(--border); border-radius:999px;
+      padding:4px 10px; background:#061006a6;
+    }
+    .grid {
+      margin:22px auto; display:grid; gap:16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .feature .icon { font-size:22px; margin-bottom:4px; }
+    .feature .list { margin-top:6px; opacity:.9; font-size:14px; display:grid; gap:4px; }
+    .arch { margin-top:18px; }
+    .diagram { margin-top:8px; display:grid; gap:8px; }
+    .lane { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .box {
+      padding:8px 10px; border-radius:10px; border:1px solid var(--border);
+      background:#020a04; font-family:"Share Tech Mono", monospace; font-size:13px;
+    }
+    .svc { box-shadow:0 0 0 1px rgba(0,255,156,.08); }
+    .ai  { box-shadow:0 0 0 1px rgba(0,255,156,.12); }
+    .user{ box-shadow:0 0 0 1px rgba(0,255,156,.08); }
+    .arrow { opacity:.7; font-family:"Share Tech Mono", monospace; }
+    .quick { margin-top:8px; display:grid; gap:8px; }
+    details { border:1px solid var(--border); border-radius:12px; padding:8px 10px; background:#06100680; }
+    details summary { cursor:pointer; user-select:none; color:var(--muted); }
+    pre { margin:8px 0 0; }
+  </style>
+{% endblock %}

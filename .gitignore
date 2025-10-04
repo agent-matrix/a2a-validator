@@ -1,0 +1,37 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment files
+.env
+
+# Test & coverage reports
+.cache/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# IDE & OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# RAG index files
+.faiss/
+/backup
+ copy *.*
+* copy.* 
+* copy *.py 

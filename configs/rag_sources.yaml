@@ -1,0 +1,41 @@
+# Where to pull documentation from when building the RAG knowledge base.
+# You can add/remove repos here; the builder will respect these sources.
+
+github:
+  # 1) Explicit repos (stable)
+  repos:
+    - owner: agent-matrix
+      name: matrix-cli
+      branch: master
+      docs_paths: ["docs"]      # folders to harvest (recursive)
+      include_readme: true
+    - owner: agent-matrix
+      name: matrix-python-sdk
+      branch: master
+      docs_paths: ["docs"]
+      include_readme: true
+    - owner: agent-matrix
+      name: matrixlink
+      branch: master
+      docs_paths: ["docs"]
+      include_readme: true
+    - owner: agent-matrix
+      name: matrix-hub
+      branch: master
+      docs_paths: ["docs"]
+      include_readme: true
+
+  # 2) Optionally scan an entire org for repos (README + docs/ if present)
+  #    Comment out if you want only the explicit list above.
+  orgs:
+    - agent-matrix
+
+# Local content in THIS repo (optional but recommended)
+local:
+  paths:
+    - docs           # everything under /docs
+    - README.md      # root readme
+  glob: "**/*.md"    # or "**/*.{md,mdx,txt}"
+
+# Extra public URLs to pull (optional)
+urls: []

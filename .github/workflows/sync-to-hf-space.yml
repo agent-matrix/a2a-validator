@@ -1,0 +1,53 @@
+# .github/workflows/sync-to-hf-space.yml
+name: Sync to Hugging Face Space (a2a-validator)
+
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch: {}  # optional manual run
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: hf-space-sync-a2a-validator
+      cancel-in-progress: false
+
+    # Hard-wire your Space coordinates here
+    env:
+      HF_USERNAME: ruslanmv
+      SPACE_NAME: a2a-validator
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Prepare Git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git lfs install --local
+
+      - name: Force push GitHub → Hugging Face Space (GitHub is source of truth)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          set -e
+          if [ -z "$HF_TOKEN" ]; then
+            echo "❌ Missing HF_TOKEN secret. Add it under: Settings → Secrets and variables → Actions → New repository secret."
+            exit 1
+          fi
+
+          # Build the authenticated remote URL *inside* the step so the secret expands.
+          REMOTE_URL="https://${HF_USERNAME}:${HF_TOKEN}@huggingface.co/spaces/${HF_USERNAME}/${SPACE_NAME}"
+
+          echo "🔁 Forcing HEAD → Space main (GitHub is the source of truth)..."
+          git push --force "$REMOTE_URL" HEAD:main
+
+          # Best-effort push for LFS objects (won't fail the job if none)
+          git lfs push --all "$REMOTE_URL" main || true
+
+          echo "✅ Sync complete: GitHub HEAD is now Space main."

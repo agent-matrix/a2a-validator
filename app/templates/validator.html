@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block body %}
+
+<div class="card">
+  <h3>A2A Validator /// MATRIX NODE</h3>
+
+  <div class="fieldset">
+    <div class="fieldset-head" id="connection-header">ESTABLISH CONNECTION</div>
+    <div class="fieldset-body" style="display:grid; gap:12px; margin-top:12px;">
+      <input type="text" id="agent-card-url" placeholder="Enter Agent Card URL" />
+      <div class="fieldset inner">
+        <div class="fieldset-head http-headers-header" id="http-headers-toggle">
+          <span class="chev">►</span> HTTP HEADERS
+        </div>
+        <div class="fieldset-body http-headers-content" id="http-headers-content" style="display:none;">
+          <div id="headers-list"></div>
+          <button id="add-header-btn" type="button">+ Add Header</button>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button id="connect-btn" type="button">Connect</button>
+        <a class="link" href="https://a2a-protocol.org/latest/" target="_blank" rel="noreferrer">Protocol Docs ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="agent-card-section" class="fieldset" style="margin-top:16px;">
+    <h2 class="collapsible-header">
+      <span class="toggle-icon">▼</span> AGENT CARD
+    </h2>
+    <div class="collapsible-content">
+      <div id="validation-errors">
+        <p class="muted">Awaiting connection to view agent card...</p>
+      </div>
+      <div class="agent-card-display">
+          <pre><code id="agent-card-content" class="language-json"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat-container" class="fieldset" style="margin-top:16px;">
+    <div class="fieldset-head chat-header">CHAT TERMINAL</div>
+    <div class="fieldset-body">
+      <p class="muted chat-info">Agent messages marked with ✅ (compliant) or ⚠️ (non-compliant). Click to view raw JSON.</p>
+      <div id="chat-messages" class="chat-list">
+        <p class="muted placeholder-text">Messages will appear here.</p>
+      </div>
+      <div class="fieldset inner message-metadata-container">
+        <div class="fieldset-head message-metadata-header" id="message-metadata-toggle">
+          <span class="chev">►</span> MESSAGE METADATA
+        </div>
+        <div class="fieldset-body message-metadata-content" id="message-metadata-content" style="display:none;">
+          <div id="metadata-list"></div>
+          <button id="add-metadata-btn" type="button">+ Add Metadata</button>
+        </div>
+      </div>
+      <div class="row chat-input-container" style="margin-top:10px;">
+        <input type="text" id="chat-input" placeholder="> Type a message…" disabled />
+        <button id="send-btn" type="button" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loader" class="loader-overlay" aria-hidden="true" style="display:none;">
+  <div class="loader-wrap">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">CONNECTING…</div>
+  </div>
+</div>
+
+<div id="debug-console" class="hidden">
+  <div id="debug-handle">
+    <span>Debug Console</span>
+    <div class="debug-controls">
+      <button id="clear-console-btn">Clear</button>
+      <button id="toggle-console-btn">Show</button>
+    </div>
+  </div>
+  <div id="debug-content"></div>
+</div>
+
+<div id="json-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <span class="modal-close-btn">&times;</span>
+    <h3>Raw JSON</h3>
+    <pre id="modal-json-content"></pre>
+  </div>
+</div>
+
+<style>
+  :root {
+    --matrix: #00ff9c;
+    --border: rgba(0, 255, 156, 0.2);
+    --background: #020a04;
+    --dark-surface: #0a140a;
+    --muted-2: #9aa29a;
+  }
+  body {
+    font-family: "Share Tech Mono", monospace;
+    background-color: var(--background);
+    color: #e0e0e0;
+    margin: 0;
+    padding: 2rem;
+  }
+  body::before{
+    content:"";
+    position: fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(800px 500px at 50% -20%, rgba(0,255,156,0.08), transparent 40%),
+      linear-gradient(180deg, rgba(0,0,0,0.72), rgba(0,0,0,0.65));
+  }
+
+  .card { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+  h1, h2, h3, .fieldset-head { text-transform: uppercase; }
+  h1 { color: var(--matrix); }
+  h2 { font-size: 1em; margin: 0; }
+  .muted { color: var(--muted-2, #9aa29a); }
+  .row { display:flex; gap:8px; align-items: center; }
+  .row input[type="text"] { flex:1; }
+  .actions-row { display: flex; gap: 12px; align-items: center; }
+  
+  .fieldset { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: rgba(2,10,4,0.35); backdrop-filter: blur(2px); }
+  .fieldset.inner { background: rgba(2,10,4,0.25); border-color: rgba(128, 128, 128, 0.3); }
+  .fieldset-head, .collapsible-header { font-weight: 600; letter-spacing: .02em; cursor: pointer; user-select:none; display:flex; align-items:center; gap:6px; color: var(--matrix); text-shadow: 0 0 5px var(--matrix); padding: 5px; }
+  .fieldset-body, .collapsible-content { padding-top: 4px; }
+  .fieldset-body pre { background: #020a04; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin: 8px 0 0 0; }
+  .chev, .toggle-icon { font-family: ui-monospace, "Share Tech Mono", monospace; }
+
+  input, button { font-family: inherit; }
+  input[type="text"] { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: #e0e0e0; }
+  button { background: transparent; border: 1px solid var(--matrix); color: var(--matrix); padding: 10px 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  button:hover:not(:disabled) { background: var(--matrix); color: var(--background); box-shadow: 0 0 10px var(--matrix); }
+  button:disabled { border-color: var(--muted-2); color: var(--muted-2); cursor: not-allowed; }
+
+  .chat-list { height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .chat-info { font-size: 0.9em; }
+
+  /* Debug & Modal Styling (adapted for Matrix theme) */
+  #debug-console { position: fixed; bottom: 0; left: 0; right: 0; height: 200px; background: var(--dark-surface); border-top: 2px solid var(--matrix); display: flex; flex-direction: column; z-index: 100; }
+  #debug-console.hidden { display: none; }
+  #debug-handle { background: #000; padding: 5px 10px; cursor: ns-resize; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.1em; }
+  #debug-content { flex-grow: 1; overflow-y: auto; padding: 10px; font-size: 0.9em; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  .modal-overlay.hidden { display: none; }
+  .modal-content { position: relative; background: var(--dark-surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; max-width: 800px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; }
+  .modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: var(--matrix); }
+
+  /* Loader Styling (same as before) */
+  .loader-overlay { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); background: radial-gradient(800px 500px at 50% -20%, rgba(0,255,156,0.08), transparent 40%), linear-gradient(180deg, rgba(0,0,0,0.72), rgba(0,0,0,0.65)); }
+  .loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 22px 26px; border-radius: 16px; border: 1px solid var(--border); background: rgba(6,16,6,0.75); box-shadow: 0 10px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,255,156,0.06); }
+  .loader-spinner { width: 64px; height: 64px; border-radius: 50%; border: 3px solid rgba(0,255,156,0.15); border-top-color: var(--matrix); border-right-color: var(--matrix); box-shadow: 0 0 18px rgba(0,255,156,0.35); animation: spin 0.9s linear infinite; }
+  .loader-text { font-family: "Share Tech Mono", monospace; letter-spacing: 0.08em; color: var(--matrix); text-shadow: 0 0 8px rgba(0,255,156,0.35); opacity: 0.95; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="/static/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<script>
+  // Raining Code Effect
+  const canvas = document.getElementById('matrix-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const rainDrops = Array.from({ length: columns }).fill(1);
+    const draw = () => {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0F0';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < rainDrops.length; i++) {
+            const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+            ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+            if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                rainDrops[i] = 0;
+            }
+            rainDrops[i]++;
+        }
+    };
+    setInterval(draw, 33);
+  }
+
+  // The main script.js will handle its own toggles now that the HTML is correct.
+  // We only need to add listeners for the fieldsets that script.js doesn't know about.
+  (function () {
+      function setupToggle(toggleEl, contentEl) {
+          if (!toggleEl || !contentEl) return;
+          toggleEl.addEventListener('click', () => {
+              const isHidden = contentEl.style.display === 'none';
+              contentEl.style.display = isHidden ? 'block' : 'none';
+              const chev = toggleEl.querySelector('.chev');
+              if (chev) chev.textContent = isHidden ? '▼' : '►';
+          });
+      }
+      // script.js handles '.collapsible-header', so we only set up our custom fieldsets.
+      setupToggle(document.getElementById('http-headers-toggle'), document.getElementById('http-headers-content'));
+      setupToggle(document.getElementById('message-metadata-toggle'), document.getElementById('message-metadata-content'));
+  })();
+</script>
+{% endblock %}

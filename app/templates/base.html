@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>matrix-ai</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+          --bg: #020402;
+          --bg2: #071007;
+          --text: #c8facc;
+          --muted: #7ef7a7;
+          --matrix: #00ff9c;
+          --card: #061006cc; /* translucent */
+          --border: #0d1e0f;
+      }
+      html, body { height: 100%; }
+      body {
+          margin: 0;
+          color: var(--text);
+          background:
+            radial-gradient(1200px 800px at 100% -10%, rgba(0,255,156,0.06), transparent 40%),
+            radial-gradient(1000px 600px at -10% 100%, rgba(0,255,156,0.05), transparent 40%),
+            linear-gradient(180deg, var(--bg), var(--bg2) 60%, var(--bg));
+          font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          overflow-y: auto;
+      }
+      body::after {
+          content: "";
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          background: repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 2px, transparent 3px);
+          mix-blend-mode: overlay;
+          opacity: 0.6;
+          z-index: 0;
+      }
+      #code-rain {
+          position: fixed;
+          inset: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0.65;
+      }
+      header {
+          position: sticky; top: 0; z-index: 3;
+          display: flex; align-items: center; gap: 18px;
+          padding: 18px 22px;
+          background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0));
+          border-bottom: 1px solid var(--border);
+          backdrop-filter: blur(4px);
+      }
+      .brand {
+          font-family: "Share Tech Mono", monospace;
+          color: var(--matrix);
+          text-shadow: 0 0 8px rgba(0,255,156,0.4);
+          letter-spacing: 0.04em;
+          font-size: 18px;
+      }
+      nav a {
+          color: var(--muted);
+          text-decoration: none;
+          margin-right: 16px;
+          transition: color .15s ease, text-shadow .15s ease;
+      }
+      nav a:hover {
+          color: var(--matrix);
+          text-shadow: 0 0 8px rgba(0,255,156,0.4);
+      }
+      .wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto; padding: 26px 22px 60px; }
+      .card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          box-shadow: 0 0 0 1px rgba(0,255,156,0.06), 0 8px 30px rgba(0,0,0,0.35);
+          padding: 20px;
+      }
+      h2, h3, h4 { font-family: "Share Tech Mono", monospace; color: var(--matrix); letter-spacing: .02em; }
+      p { color: var(--text); opacity: 0.95; }
+      input, textarea {
+          width: 100%;
+          color: var(--text);
+          background: #020a04;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 12px 12px;
+          font-size: 14px;
+          font-family: "Share Tech Mono", monospace;
+          outline: none;
+          transition: border-color .15s ease, box-shadow .15s ease;
+      }
+      input:focus, textarea:focus {
+          border-color: var(--matrix);
+          box-shadow: 0 0 0 3px rgba(0,255,156,0.08), 0 0 12px rgba(0,255,156,0.25) inset;
+      }
+      button {
+          background: linear-gradient(180deg, #00ff9c, #00c97e);
+          color: #002f1b;
+          border: 0;
+          padding: 10px 16px;
+          border-radius: 12px;
+          font-weight: 700;
+          font-family: "Share Tech Mono", monospace;
+          letter-spacing: 0.03em;
+          cursor: pointer;
+          box-shadow: 0 6px 20px rgba(0,255,156,0.25);
+          transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+      }
+      button:hover { filter: brightness(1.05); box-shadow: 0 10px 30px rgba(0,255,156,0.35); }
+      button:active { transform: translateY(1px); }
+      pre, code {
+          font-family: "Share Tech Mono", monospace;
+          background: #020a04;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+      }
+      pre { padding: 12px; overflow: auto; }
+      @keyframes glow {
+          0%, 100% { text-shadow: 0 0 10px rgba(0,255,156,0.12); }
+          50%      { text-shadow: 0 0 14px rgba(0,255,156,0.28); }
+      }
+      h3 { animation: glow 3.5s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    <canvas id="code-rain"></canvas>
+
+    <header>
+        <div class="brand">MATRIX-AI</div>
+        <nav>
+            <a href="/validator">Validator</a>
+            <a href="/home">Info</a>
+            <a href="https://github.com/agent-matrix/matrix-ai" target="_blank" rel="noreferrer" title="Give me a star on GitHub!">GitHub</a>
+        </nav>
+    </header>
+
+    <div class="wrap">
+        {% block body %}{% endblock %}
+    </div>
+
+    <script>
+      (function () {
+          const c = document.getElementById('code-rain');
+          if (!c) return;
+          const ctx = c.getContext('2d', { alpha: true });
+          let w, h, cols, drops;
+          const fontSize = 20;
+          const charSet = 'アァカサタナハマヤラワ0123456789アイウエオｱｲｳｴｵ01';
+
+          function resize() {
+              w = c.width = window.innerWidth;
+              h = c.height = window.innerHeight;
+              cols = Math.floor(w / fontSize);
+              drops = Array(cols).fill(0).map(() => Math.floor(Math.random() * -50));
+              ctx.font = fontSize + "px 'Share Tech Mono', monospace";
+          }
+
+          function draw() {
+              ctx.fillStyle = 'rgba(2, 10, 4, 0.10)';
+              ctx.fillRect(0, 0, w, h);
+              for (let i = 0; i < cols; i++) {
+                  const x = i * fontSize;
+                  const y = drops[i] * fontSize;
+                  const ch = charSet[Math.floor(Math.random() * charSet.length)];
+                  ctx.shadowColor = 'rgba(0,255,156,0.35)';
+                  ctx.shadowBlur = 8;
+                  ctx.fillStyle = '#00ff9c';
+                  ctx.fillText(ch, x, y);
+                  if (y > h && Math.random() > 0.975) drops[i] = 0;
+                  else drops[i]++;
+              }
+              setTimeout(draw, 70);
+          }
+
+          window.addEventListener('resize', resize);
+          resize();
+          draw();
+      })();
+    </script>
+</body>
+</html>

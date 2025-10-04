@@ -1,0 +1,243 @@
+/* ================================
+   MatrixHub / A2A Validator Styles
+   (app/static/styles.css)
+   ================================ */
+
+/* Theme tokens (inherits nicely with base.html) */
+:root {
+  --bg: #020402;
+  --bg2: #071007;
+  --surface: #061006cc;
+  --text: #c8facc;
+  --muted: #9aa29a;
+  --matrix: #00ff9c;
+  --border: rgba(0,255,156,0.18);
+  --border-strong: #0d1e0f;
+  --code-bg: #020a04;         /* solid code background to stop canvas bleed */
+}
+
+/* Container (kept for compatibility with older markup) */
+.container {
+  max-width: 980px;
+  margin: 2rem auto;
+  font-family: "Share Tech Mono", monospace;
+  color: var(--text);
+}
+
+/* Simple spacing helpers used by script.js flows */
+.url-input-container,
+.connect-btn-container,
+.chat-input-container {
+  margin: 1rem 0;
+}
+
+/* Key-Value rows (HTTP headers / metadata rows) */
+.kv-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: .5rem;
+  margin-bottom: .5rem;
+  align-items: center;
+}
+
+.kv-row input[type="text"],
+.kv-row input[type="search"],
+.kv-row input[type="url"] {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.kv-row input:focus {
+  border-color: var(--matrix);
+  box-shadow: 0 0 0 3px rgba(0,255,156,0.08);
+}
+
+.kv-del {
+  padding: .45rem .7rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: filter .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.kv-del:hover {
+  color: #032215;
+  background: linear-gradient(180deg, #00ff9c, #00c97e);
+  box-shadow: 0 8px 24px rgba(0,255,156,0.25);
+}
+
+/* Collapsible helpers */
+.collapsible-content.hidden,
+.hidden { display: none; }
+
+/* Chat bubbles (dark theme) */
+.chat-bubble {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .6rem .7rem;
+  margin: .5rem 0;
+  background: rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .05s ease, background .15s ease;
+}
+.chat-bubble:hover {
+  background: rgba(0,0,0,0.35);
+}
+.chat-bubble:active {
+  transform: translateY(1px);
+}
+.chat-bubble.ok {
+  box-shadow: 0 0 0 1px rgba(0,255,156,0.18);
+}
+.chat-bubble.warn {
+  box-shadow: 0 0 0 1px rgba(255,196,0,0.22);
+}
+
+/* Chat bubble header line */
+.chat-head {
+  font-weight: 700;
+  color: var(--matrix);
+  margin-bottom: .25rem;
+  letter-spacing: .02em;
+}
+
+/* Status colors used in various places */
+.ok   { color: #35d08c; }
+.warn { color: #e2a339; }
+
+/* Placeholder/aux text */
+.placeholder-text { color: var(--muted); }
+
+/* ===============================
+   Debug Console (dark, sticky)
+   =============================== */
+#debug-console {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: 460px;
+  max-height: 60vh;
+  background: #0a140a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(0,0,0,.35), 0 0 0 1px rgba(0,255,156,.05);
+  z-index: 1000;
+}
+#debug-console.hidden { display: none; }
+
+#debug-handle {
+  background: #000;
+  color: var(--text);
+  padding: .6rem .8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  letter-spacing: .08em;
+  border-bottom: 1px solid var(--border);
+}
+
+#debug-content {
+  padding: .6rem .8rem;
+  max-height: 48vh;
+  overflow: auto;
+  font-family: "Share Tech Mono", monospace;
+}
+
+/* Make logged JSON blocks readable and SOLID (no canvas bleed-through) */
+#debug-content pre {
+  background: var(--code-bg) !important;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ===============================
+   Code / Pre blocks — OPAQUE FIX
+   =============================== */
+
+/* Global default for code/pre used across validator */
+pre, code, pre code {
+  background: var(--code-bg) !important;  /* solid background */
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Specific areas we know render JSON (agent card, modal, chat bubbles) */
+#agent-card-content,
+.agent-card-display pre,
+.agent-card-display pre code,
+#modal-json-content,
+.chat-bubble pre {
+  background: var(--code-bg) !important;
+  backdrop-filter: none !important;
+}
+
+/* Highlight.js fallback (some themes force their own bg) */
+.hljs,
+code.hljs {
+  background: var(--code-bg) !important;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* ===============================
+   Buttons (generic)
+   =============================== */
+button,
+.button {
+  background: linear-gradient(180deg, #00ff9c, #00c97e);
+  color: #032215;
+  border: 0;
+  padding: .6rem .9rem;
+  border-radius: 12px;
+  font-weight: 800;
+  font-family: "Share Tech Mono", monospace;
+  letter-spacing: .03em;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,255,156,0.25);
+  transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
+}
+button:hover,
+.button:hover { filter: brightness(1.05); box-shadow: 0 12px 36px rgba(0,255,156,0.35); }
+button:active,
+.button:active { transform: translateY(1px); }
+button:disabled {
+  background: #0b1a12;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Inputs (generic) */
+input[type="text"],
+input[type="search"],
+input[type="url"] {
+  width: 100%;
+  color: var(--text);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: "Share Tech Mono", monospace;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus {
+  border-color: var(--matrix);
+  box-shadow: 0 0 0 3px rgba(0,255,156,0.08), 0 0 12px rgba(0,255,156,0.25) inset;
+}
