@@ -140,15 +140,18 @@ def get_card_resolver(client: httpx.AsyncClient, agent_card_url: str) -> Any:
 # ==============================================================================
 # FastAPI Routes
 # ==============================================================================
-@router.get("/", response_class=HTMLResponse)
+
+# FIX: Add a decorator to handle requests without a trailing slash
+@router.get("", response_class=HTMLResponse, include_in_schema=False) # Handles /validator
+@router.get("/", response_class=HTMLResponse)                         # Handles /validator/
 async def validator_ui(request: Request) -> HTMLResponse:
-    # Prefer validator.hml (your current file), fallback to validator.html
-    for name in ("validator.hml", "validator.html"):
+    """Serves the main validator UI page."""
+    # This logic already correctly tries to find validator.html or a fallback
+    for name in ("validator.html", "validator.hml"):
         try:
             return templates.TemplateResponse(name, {"request": request})
         except TemplateNotFound:
             continue
-    # If neither exists, return a minimal message
     return HTMLResponse("<h3>Validator UI template not found.</h3>", status_code=500)
 
 
