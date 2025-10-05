@@ -67,8 +67,8 @@ You can run A2A Validator as a single container. Choose your preferred registry,
 
 > Replace placeholders with your image path and tag:
 >
-> * Docker Hub: `docker.io/russlanmv/a2a-validator`
-> * GHCR: `ghcr.io/<owner>/a2a-validator`
+> * Docker Hub: `docker.io/ruslanmv/a2a-validator`
+> * GHCR: `ghcr.io/ruslanmv/a2a-validator`
 
 ### Option 1 — Docker Hub
 
@@ -91,7 +91,7 @@ echo "$GITHUB_TOKEN" | docker login ghcr.io -u <github-username> --password-stdi
 Then pull and run:
 
 ```bash
-docker pull ghcr.io/<owner>/a2a-validator
+docker pull ghcr.io/ruslanmv/a2a-validator
 
 docker run --rm -p 7860:7860 ghcr.io/ruslanmv/a2a-validator
 ```
