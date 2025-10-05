@@ -59,6 +59,59 @@ curl -s -X POST localhost:7860/agent-card \
   -d '{"url":"http://localhost:8080/","sid":"test"}' | jq
 ```
 
+## Installation (Docker) — pull from Docker Hub or GHCR
+
+You can run A2A Validator as a single container. Choose your preferred registry, pull the image, and map a port.
+
+> Replace placeholders with your image path and tag:
+>
+> * Docker Hub: `docker.io/russlanmv/a2a-validator`
+> * GHCR: `ghcr.io/<owner>/a2a-validator`
+
+### Option 1 — Docker Hub
+
+```bash
+# Pull
+docker pull docker.io/ruslanmv/a2a-validator
+
+# Run (maps host 7860 → container 7860)
+docker run --rm -p 7860:7860 docker.io/ruslanmv/a2a-validator
+```
+
+### Option 2 — GitHub Container Registry (GHCR)
+
+If needed, authenticate first:
+
+```bash
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u <github-username> --password-stdin
+```
+
+Then pull and run:
+
+```bash
+docker pull ghcr.io/<owner>/a2a-validator
+
+docker run --rm -p 7860:7860 ghcr.io/ruslanmv/a2a-validator
+```
+
+### Quick smoke test
+
+With the container running locally:
+
+```bash
+# Open the UI
+# http://localhost:7860/validator
+
+# Optional: test the card endpoint
+curl -s -X POST http://localhost:7860/agent-card \
+  -H 'content-type: application/json' \
+  -d '{"url":"http://localhost:8080/","sid":"test"}' | jq
+```
+
+To stop it, press `Ctrl+C` (foreground) or `docker stop <container-id>` if you ran it detached.
+
+
+
 -----
 
 ## 🛠️ How It Works
