@@ -8,7 +8,9 @@ pinned: false
 ---
 
 # A2A Validator 🔬
-![](assets/2025-10-05-00-49-00.png)
+![](assets/a2a-validator.gif)
+
+
 **A2A Validator** is a focused web app for testing AI agents that speak the **A2A (Agent-to-Agent) protocol**. Paste an agent URL, connect, and the app will fetch the agent’s discovery document, validate it against the protocol, and provide a real-time message terminal. It’s a tool designed for the build/integration loop: tight feedback, zero ceremony.
 
 The backend runs on **FastAPI** and **Socket.IO**, with a lightweight HTML/JS frontend. The core validator checks both the static **Agent Card** and the live events an agent emits. If the optional `a2a-sdk` is present, it's used for card resolution and streaming; if not, the app gracefully falls back to a "plain HTTP" mode for basic card linting.
@@ -164,6 +166,9 @@ sequenceDiagram
     S->>S: Validate each response
     S-->>U: 'agent_response' with validation notes
 ```
+### Example card
+![](assets/2025-10-05-00-49-00.png)
+
 
 -----
 
